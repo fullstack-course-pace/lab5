@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemButton,
   Typography,
+  Box,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 
@@ -51,16 +52,16 @@ export default function CitySearch({ onSelect }: { onSelect: (p: Place) => void 
   const { data, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["geocode", submitted],
     queryFn: () => geocode(submitted),
-    enabled: submitted.length > 0, // run only after user submits
-    staleTime: 60_000, // cache for 1 minute
+    enabled: submitted.length > 0, // runs after submit
+    staleTime: 60_000,
     retry: 1,
   });
 
-  function search() {
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();                 // stop page reload
     const term = q.trim();
     if (!term) return;
-    setSubmitted(term);
-    // If you want to force a refetch even for same term: refetch();
+    setSubmitted(term);                 // triggers the query
   }
 
   return (
@@ -70,19 +71,21 @@ export default function CitySearch({ onSelect }: { onSelect: (p: Place) => void 
           Pick a City
         </Typography>
 
-        <div style={{ display: "flex", gap: 8 }}>
+        <Box component="form" onSubmit={onSubmit} sx={{ display: "flex", gap: 1 }}>
           <TextField
+            fullWidth
             size="small"
             label="Search city"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search()}
+            // Force label to float to avoid any overlap in some browsers/themes
+            InputLabelProps={{ shrink: q.length > 0 }}
             inputProps={{ "aria-label": "Search city" }}
           />
-          <Button variant="contained" onClick={search} disabled={isFetching}>
+          <Button type="submit" variant="contained" disabled={isFetching}>
             {isFetching ? "Searching..." : "Search"}
           </Button>
-        </div>
+        </Box>
 
         {isError && (
           <Typography color="error" sx={{ mt: 1 }}>
