@@ -1,9 +1,8 @@
 "use client";
 import { useState } from "react";
-import { TextField, Button, Card, CardContent, List, ListItem } from "@mui/material";
-import { fetchJson } from "../lib/weather";
+import { TextField, Button, Card, CardContent, List, ListItem, ListItemButton } from "@mui/material";
 
-type Place = { name: string; country?: string; latitude: number; longitude: number };
+export type Place = { name: string; country?: string; latitude: number; longitude: number };
 
 export default function CitySearch({ onSelect }: { onSelect: (p: Place) => void }) {
   const [q, setQ] = useState("");
@@ -15,10 +14,11 @@ export default function CitySearch({ onSelect }: { onSelect: (p: Place) => void 
     setLoading(true);
     try {
       const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5`;
-      const data = await fetchJson<{ results?: any[] }>(url);
-      setResults((data.results || []).map(r => ({
-        name: r.name, country: r.country, latitude: r.latitude, longitude: r.longitude
-      })));
+      const res = await fetch(url);
+      const data = await res.json();
+      type GeoResult = { name: string; country?: string; latitude: number; longitude: number };
+      const items: GeoResult[] = (data.results || []) as GeoResult[];
+      setResults(items.map((r) => ({ name: r.name, country: r.country, latitude: r.latitude, longitude: r.longitude })));
     } finally {
       setLoading(false);
     }
@@ -34,8 +34,10 @@ export default function CitySearch({ onSelect }: { onSelect: (p: Place) => void 
         </div>
         <List>
           {results.map((p, i) => (
-            <ListItem key={i} button onClick={() => onSelect(p)}>
-              {p.name}{p.country ? `, ${p.country}` : ""} — ({p.latitude.toFixed(2)}, {p.longitude.toFixed(2)})
+            <ListItem key={i}>
+              <ListItemButton onClick={() => onSelect(p)}>
+                {p.name}{p.country ? `, ${p.country}` : ""}  ({p.latitude.toFixed(2)}, {p.longitude.toFixed(2)})
+              </ListItemButton>
             </ListItem>
           ))}
         </List>
