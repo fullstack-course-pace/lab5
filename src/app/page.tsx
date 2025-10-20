@@ -1,19 +1,18 @@
 "use client";
-
-import dynamic from "next/dynamic";
+import CitySearch from "./components/CitySearch";
+import CurrentWeather from "./components/CurrentWeather";
+import WeeklyForecast from "./components/WeeklyForecast";
 import { useState } from "react";
 import type { Place } from "./components/CitySearch";
-
-const CitySearch = dynamic(() => import("./components/CitySearch"));
-const CurrentWeather = dynamic(() => import("./components/CurrentWeather"));
 
 export default function Page() {
   const [selected, setSelected] = useState<Place | undefined>(undefined);
 
   return (
     <div>
-      <CitySearch onSelect={(p) => setSelected(p)} />
+      <CitySearch onSelect={setSelected} />
       <CurrentWeather place={selected} />
+      <WeeklyForecast place={selected} />
     </div>
   );
 }
